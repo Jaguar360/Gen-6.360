@@ -1,0 +1,30 @@
+exports.BattleAbilities = {
+  "ironfist": {
+    desc: "This Pokemon receives a 40% power boost for the following attacks: Bullet Punch, Comet Punch, Dizzy Punch, Drain Punch, Dynamicpunch, Fire Punch, Focus Punch, Hammer Arm, Ice Punch, Mach Punch, Mega Punch, Meteor Mash, Shadow Punch, Sky Uppercut, and Thunderpunch. Sucker Punch, which is known Ambush in Japan, is not boosted.",
+    shortDesc: "This Pokemon's punch-based attacks do 1.4x damage. Sucker Punch is not boosted.",
+    onBasePowerPriority: 8,
+    onBasePower: function(basePower, attacker, defender, move) {
+      if (move.isPunchAttack) {
+        this.debug('Iron Fist boost');
+        return this.chainModify(1.4);
+      }
+    },
+    id: "ironfist",
+    name: "Iron Fist",
+    rating: 3,
+    num: 89
+  },
+  "illuminate": {
+    desc: "This Pokemon receives a 30% boost to accuracy for all attacks.",
+    shortDesc: "This Pokemon's accuracy is raised by 1.3x",
+    onModifyMove: function(move) {
+      if typeof move.accuracy !== 'number') return;
+			  this.debug('illuminate - enhancing accuracy');
+			  move.accuracy *= 1.3;
+		},
+    id: "illuminate",
+		name: "Illuminate",
+    rating: 3.5
+    num: 35
+  },
+};
