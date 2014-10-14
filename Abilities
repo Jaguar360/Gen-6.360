@@ -1,30 +1,165 @@
 exports.BattleAbilities = {
-  "ironfist": {
-    desc: "This Pokemon receives a 40% power boost for the following attacks: Bullet Punch, Comet Punch, Dizzy Punch, Drain Punch, Dynamicpunch, Fire Punch, Focus Punch, Hammer Arm, Ice Punch, Mach Punch, Mega Punch, Meteor Mash, Shadow Punch, Sky Uppercut, and Thunderpunch. Sucker Punch, which is known Ambush in Japan, is not boosted.",
-    shortDesc: "This Pokemon's punch-based attacks do 1.4x damage. Sucker Punch is not boosted.",
-    onBasePowerPriority: 8,
-    onBasePower: function(basePower, attacker, defender, move) {
-      if (move.isPunchAttack) {
-        this.debug('Iron Fist boost');
-        return this.chainModify(1.4);
-      }
-    },
-    id: "ironfist",
-    name: "Iron Fist",
-    rating: 3,
-    num: 89
-  },
-  "illuminate": {
-    desc: "This Pokemon receives a 30% boost to accuracy for all attacks.",
-    shortDesc: "This Pokemon's accuracy is raised by 1.3x",
-    onModifyMove: function(move) {
-      if typeof move.accuracy !== 'number') return;
-			  this.debug('illuminate - enhancing accuracy');
-			  move.accuracy *= 1.3;
+	"ironfist": {
+	   	desc: "This Pokemon receives a 40% power boost for the following attacks: Bullet Punch, Comet Punch, Dizzy Punch, Drain Punch, Dynamicpunch, Fire Punch, Focus Punch, Hammer Arm, Ice Punch, Mach Punch, Mega Punch, Meteor Mash, Shadow Punch, Sky Uppercut, and Thunderpunch. Sucker Punch, which is known Ambush in Japan, is not boosted.",
+	   	shortDesc: "This Pokemon's punch-based attacks do 1.4x damage. Sucker Punch is not boosted.",
+	   	onBasePower: function(basePower, attacker, defender, move) {
+	   		if (move.isPunchAttack) {
+	        		this.debug('Iron Fist boost');
+	        		return this.chainModify(1.4);
+	      		}
+	    	},
+	 	id: "ironfist",
+	    	name: "Iron Fist",
+	    	rating: 3.5,
+	    	num: 89
+	},
+	"illuminate": {
+	   	desc: "This Pokemon receives a 30% boost to accuracy for all attacks.",
+	   	shortDesc: "This Pokemon's accuracy is raised by 1.3x",
+	   	onModifyMove: function(move) {
+	      		if typeof move.accuracy !== 'number') return;
+				  this.debug('illuminate - enhancing accuracy');
+				  move.accuracy *= 1.3;
+			},
+	    	id: "illuminate",
+			name: "Illuminate",
+	    	rating: 4
+	    	num: 35
+	 },
+ 	justified": {
+		desc: "Will raise the user's Attack stat two levels when hit by any Dark-type moves. Unlike other abilities with immunity to certain typed moves, the user will still receive damage from the attack. Justified will raise Attack one level for each hit of a multi-hit move like Beat Up.",
+		shortDesc: "This Pokemon's Attack is boosted by 2 after it is damaged by a Dark-type attack.",
+		onAfterDamage: function(damage, target, source, effect) {
+			if (effect && effect.type === 'Dark') {
+				this.boost({atk:2});
+			}
 		},
-    id: "illuminate",
-		name: "Illuminate",
-    rating: 3.5
-    num: 35
-  },
+		id: "justified",
+		name: "Justified",
+		rating: 2.5,
+		num: 154
+	},
+	"keeneye": {
+		desc: "This Pokemon receives a 20% boost to accuracy for all attacks. Its Accuracy cannot be lowered.",
+		shortDesc: "Prevents other Pokemon from lowering this Pokemon's accuracy and raises its accuracy by 1.2x.",
+		onBoost: function(boost, target, source) {
+			if (source && target === source) return;
+			if (boost['accuracy'] && boost['accuracy'] < 0) {
+				boost['accuracy'] = 0;
+				this.add("-message", target.name+"'s accuracy was not lowered! (placeholder)");
+			}
+		onModifyMove: function(move) {
+	      		if typeof move.accuracy !== 'number') return;
+				  this.debug('keeneye - enhancing accuracy');
+				  move.accuracy *= 1.2;
+		},
+		id: "keeneye",
+		name: "Keen Eye",
+		rating: 3.5,
+		num: 51
+	},
+	"magmaarmor": {
+		desc: "This Pokemon receives halved damage from Water-type and Fire-type attacks.",
+		shortDesc: "This Pokemon receives half damage from Fire- and Water-type attacks.",
+		onSourceBasePower: function(basePower, attacker, defender, move) {
+			if (move.type === 'Water' || move.type === 'Fire') {
+				this.debug('Magma Armor weaken');
+				return basePower / 2;
+			}
+		id: "magmaarmor",
+		name: "Magma Armor",
+		rating: 3,
+		num: 40
+	},
+	"rivalry": {
+		desc: "Increases base power of Physical and Special attacks by 25% if the opponent is the same gender,
+		shortDesc: "This Pokemon's attacks do 1.25x on same gender targets.",
+		onBasePower: function(basePower, attacker, defender, move) {
+			if (attacker.gender && defender.gender) {
+				if (attacker.gender === defender.gender) {
+					this.debug('Rivalry boost');
+					return basePower * 5/4;
+				}
+			}
+		},
+		id: "rivalry",
+		name: "Rivalry",
+		rating: 3,
+		num: 79
+	},
+	"sand veil": {
+		desc: "If active while Sandstorm is in effect, this Pokemon recovers one-sixteenth of its max HP after each turn.",
+		shortDesc: "If Sandstorm is active, this Pokemon heals 1/16 of its max HP each turn.",
+		nWeather: function(target, source, effect) {
+			if (effect.id === 'sandstorm') {
+				this.heal(target.maxhp/16);
+			}
+		},
+		id: "sandveil",
+		name: "Sand Veil",
+		rating: 2,
+		num: 8
+	},
+	"slow start": {
+	desc: "After this Pokemon switches into the battle, its Attack and Speed stats are halved for three turns; for example, if this Pokemon has an Attack stat of 400, it will effectively have an Attack stat of 200 until the effects of Slow Start wear off.",
+		shortDesc: "On switch-in, this Pokemon's Attack and Speed are halved for 3 turns.",
+		onStart: function(pokemon) {
+			pokemon.addVolatile('slowstart');
+		},
+		effect: {
+			duration: 3,
+			onStart: function(target) {
+				this.add('-start', target, 'Slow Start');
+			},
+			onModifyAtk: function(atk, pokemon) {
+				if (pokemon.ability !== 'slowstart') {
+					pokemon.removeVolatile('slowstart');
+					return;
+				}
+				return atk / 2;
+			},
+			onModifySpe: function(spe, pokemon) {
+				if (pokemon.ability !== 'slowstart') {
+					pokemon.removeVolatile('slowstart');
+					return;
+				}
+				return spe / 2;
+			},
+			onEnd: function(target) {
+				this.add('-end', target, 'Slow Start');
+			}
+		},
+		id: "slowstart",
+		name: "Slow Start",
+		rating: -1,
+		num: 112
+	},
+	"snowcloak": {
+		desc: "If active while Hail is in effect, this Pokemon recovers one-sixteenth of its max HP after each turn.",
+		shortDesc: "If Hail is active, this Pokemon heals 1/16 of its max HP each turn.",
+		nWeather: function(target, source, effect) {
+			if (effect.id === 'hail') {
+				this.heal(target.maxhp/16);
+			}
+		},
+		id: "hail",
+		name: "Hail",
+		rating: 2,
+		num: 81
+	},
+	"truant": {
+		desc: "This Pokemon's Attack and Speed are lowered by one stage each turn it is active.",
+		shortDesc: "This Pokemon's Attack and Speed are lowered by 1 every turn.",
+		onResidualOrder: 26,
+		onResidualSubOrder: 1,
+		onResidual: function(pokemon) {
+			if (pokemon.activeTurns) {
+				this.boost({spe:-1, atk:-1});
+			}
+		},
+		id: "truant",
+		name: "Truant",
+		rating: -1,
+		num: 54
+	},
 };
