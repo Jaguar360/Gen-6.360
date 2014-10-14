@@ -91,7 +91,7 @@ exports.BattleTypeChart = {
 },
 "HPivs": {"spa":30}
 },
-"Fairy"; {
+"Fairy": {
 "damageTaken": {
 "Bug": 0,
 "Dark": 2,
