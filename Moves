@@ -1,0 +1,86 @@
+exports.BattleMovedex = {
+"acid": {
+        num: 51,
+        accuracy: 100,
+        basePower: 70,
+        category: "Special",
+        desc: "Deals damage to all adjacent foes with a 10% chance to lower their Special Defense by 1 stage each. Hits Steel types for Super-effective damage.",
+        shortDesc: "10% chance to lower the foe(s) Sp. Def by 1. Hits Steel types for SE damage.",
+        id: "acid",
+        name: "Acid",
+        pp: 10,
+        priority: 0,
+        getEffectiveness: function(source, target, pokemon) {
+                var type = source.type || source;
+                var totalTypeMod = 0;
+                var tarType = '';
+                for (var i=0; i<target.types.length; i++) {
+                        tarType = target.types[i];
+                        if (!this.data.TypeChart[tarType]) continue;
+                        if (tarType === 'Steel') {
+                                totalTypeMod++;
+                                continue;
+                        }
+                        var typeMod = this.data.TypeChart[tarType].damageTaken[type];
+                        if (typeMod === 1) { // super-effective
+                                totalTypeMod++;
+                        }
+                        if (typeMod === 2) { // resist
+                                totalTypeMod--;
+                        }
+                }
+                return totalTypeMod;
+        },
+        secondary: {
+                chance: 10,
+                boosts: {
+                        spd: -1
+                }
+        },
+        target: "allAdjacentFoes",
+        type: "Poison"
+},
+"acidspray": {
+        num: 491,
+        accuracy: 100,
+        basePower: 40,
+        category: "Special",
+        desc: "Deals damage to one adjacent target with a 100% chance to lower its Special Defense by 2 stages.",
+        shortDesc: "100% chance to lower the target's Sp. Def by 2.",
+        id: "acidspray",
+        isViable: true,
+        name: "Acid Spray",
+        pp: 20,
+        priority: 0,
+        getEffectiveness: function(source, target, pokemon) {
+                var type = source.type || source;
+                var totalTypeMod = 0;
+                var tarType = '';
+                for (var i=0; i<target.types.length; i++) {
+                        tarType = target.types[i];
+                        if (!this.data.TypeChart[tarType]) continue;
+                        if (tarType === 'Steel') {
+                                totalTypeMod++;
+                                continue;
+                        }
+                        var typeMod = this.data.TypeChart[tarType].damageTaken[type];
+                        if (typeMod === 1) { // super-effective
+                                totalTypeMod++;
+                        }
+                        if (typeMod === 2) { // resist
+                                totalTypeMod--;
+                        }
+                }
+                return totalTypeMod;
+        },
+        secondary: {
+                chance: 100,
+                boosts: {
+                        spd: -2
+                }
+        },
+        target: "normal",
+        type: "Poison"
+},
+
+};
