@@ -1,4 +1,34 @@
 exports.BattleAbilities = {
+	"healer": {
+		desc: "Has a 30% chance of curing its or an adjacent ally's status ailment at the end of each turn in Double and Triple Battles.",
+		shortDesc: "30% chance of curing its or an adjacent ally's status at the end of each turn.",
+		id: "healer",
+		name: "Healer",
+		onResidualOrder: 5,
+		onResidualSubOrder: 1,
+		onResidual: function(pokemon) {
+			var allyActive = pokemon.side.active;
+			if (allyActive.length === 1) {
+				return;
+			}
+			for (var i=0; i<allyActive.length; i++) {
+				if (allyActive[i] && this.isAdjacent(pokemon, allyActive[i]) && allyActive[i].status && this.random(10) < 3) {
+					allyActive[i].cureStatus();
+				}
+			}
+		},
+		onResidualOrder: 5,
+		onResidualSubOrder: 1,
+		onResidual: function(pokemon) {
+			if (pokemon.status && this.random(3) === 0) {
+				this.debug('healer');
+				this.add('-activate', pokemon, 'ability: Healer');
+				pokemon.cureStatus();
+			}
+		},
+		rating: 2,
+		num: 131
+	},
 	"ironfist": {
 	   	desc: "This Pokemon receives a 40% power boost for the following attacks: Bullet Punch, Comet Punch, Dizzy Punch, Drain Punch, Dynamicpunch, Fire Punch, Focus Punch, Hammer Arm, Ice Punch, Mach Punch, Mega Punch, Meteor Mash, Shadow Punch, Sky Uppercut, and Thunderpunch. Sucker Punch, which is known Ambush in Japan, is not boosted.",
 	   	shortDesc: "This Pokemon's punch-based attacks do 1.4x damage. Sucker Punch is not boosted.",
