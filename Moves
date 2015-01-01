@@ -82,23 +82,6 @@ exports.BattleMovedex = {
         target: "normal",
         type: "Poison"
 },
-"aerialace": {
-        num: 332,
-        accuracy: true,
-        basePower: 75,
-        category: "Physical",
-        desc: "Deals damage to one adjacent or non-adjacent target and does not check accuracy. Makes contact.",
-        shortDesc: "This move does not check accuracy.",
-        id: "aerialace",
-        isViable: true,
-        name: "Aerial Ace",
-        pp: 20,
-        priority: 0,
-        isContact: true,
-        secondary: false,
-        target: "any",
-        type: "Flying"
-},
 "ancientpower": {
         num: 246,
         accuracy: 100,
@@ -312,7 +295,7 @@ crunch": {
 },
 "doubleslap": {
         num: 3,
-        accuracy: 95,
+        accuracy: 90,
         basePower: 40,
         category: "Physical",
         desc: "Deals damage to one adjacent target and hits two times. If one of the hits breaks the target's Substitute, it will take damage for the remaining hits. If the user has the Ability Skill Link, this move will always hit five times. Makes contact.",
@@ -594,5 +577,267 @@ furyswipes": {
         secondary: false,
         target: "normal",
         type: "Psychic"
+},
+"icefang": {
+        num: 423,
+        accuracy: 95,
+        basePower: 80,
+        category: "Physical",
+        desc: "Has a 10% chance to freeze the target and a 10% chance to flinch it.",
+        shortDesc: "10% chance to freeze. 10% chance to flinch.",
+        id: "icefang",
+        isViable: true,
+        name: "Ice Fang",
+        pp: 15,
+        priority: 0,
+        flags: {bite: 1, contact: 1, protect: 1, mirror: 1},
+        isContact: true,
+        secondaries: [
+                {
+                        chance: 10,
+                        status: 'frz'
+                }, {
+                        chance: 10,
+                        volatileStatus: 'flinch'
+                }
+        ],
+        target: "normal",
+        type: "Ice"
+},
+"knockoff": {
+        num: 282,
+        accuracy: 100,
+        basePower: 70,
+        category: "Physical",
+        desc: "If the user has not fainted, the target loses its held item. This move cannot cause Pokemon with the Ability Sticky Hold to lose their held item, cause Pokemon that can Mega Evolve to lose the Mega Stone for their species, or cause a Giratina, an Arceus, or a Genesect to lose their Griseous Orb, Plate, or Drive, respectively. Items lost to this move cannot be regained with Recycle or the Ability Harvest.",
+        shortDesc: "Removes item while doing damage.",
+        id: "knockoff",
+        isViable: true,
+        name: "Knock Off",
+        pp: 20,
+        priority: 0,
+        flags: {contact: 1, protect: 1, mirror: 1},
+        isContact: true,
+        onBasePowerPriority: 4,
+        onAfterHit: function (target, source) {
+                if (target.hasAbility('stickyhold')) return;
+                if (source.hp) {
+                        var item = target.getItem();
+                        if (item.id === 'mail') {
+                                target.setItem('');
+                        } else {
+                                item = target.takeItem();
+                        }
+                        if (item) {
+                                this.add('-enditem', target, item.name, '[from] move: Knock Off', '[of] ' + source);
+                        }
+                }
+        },
+        secondary: false,
+        target: "normal",
+        type: "Dark"
+},
+"landswrath": {
+        num: 616,
+        accuracy: 100,
+        basePower: 90,
+        category: "Physical",
+        desc: "Has a 50% chance to lower the target's Defense by 1 stage.",
+        shortDesc: "50% chance to lower the target's Defense by 1.",
+        id: "landswrath",
+        isViable: true,
+        name: "Land's Wrath",
+        pp: 10,
+        priority: 0,
+        flags: {protect: 1, mirror: 1, nonsky: 1},
+        secondary: {
+                chance: 50,
+                boosts: {
+                        def: -1
+                }
+        },
+        target: "allAdjacentFoes",
+        type: "Ground"
+},
+"matblock": {
+        num: 561,
+        accuracy: true,
+        basePower: 0,
+        category: "Status",
+        desc: "The user and its party members are protected from damaging attacks made by other Pokemon, including allies, during this turn. Fails unless it is the user's first turn on the field, if the user moves last this turn, or if this move is already in effect for the user's side.",
+        shortDesc: "Protects from damaging moves. First turn out only.",
+        id: "matblock",
+        isViable: true,
+        name: "Mat Block",
+        pp: 10,
+        priority: 0,
+        flags: {snatch: 1, nonsky: 1},
+        isSnatchable: true,
+        stallingMove: true, // Note: stallingMove is not used anywhere.
+        volatileStatus: 'matblock',
+        onTryHitSide: function (side, source) {
+                if (source.activeTurns > 1) {
+                        this.add('-hint', "Mat Block only works on your first turn out.");
+                        return false;
+                }
+        },
+        effect: {
+                duration: 1,
+                onStart: function (target) {
+                        this.add('-singleturn', target, 'Mat Block');
+                },
+                onTryHitPriority: 3,
+                onAllyTryHit: function (target, source, move) {
+                        if (move.breaksProtect) {
+                                target.removeVolatile('Mat Block');
+                                return;
+                        }
+                        if (move && (move.target === 'self' || move.category === 'Status')) return;
+                                this.add('-activate', target, 'Mat Block', move.name);
+                                var lockedmove = source.getVolatile('lockedmove');
+                        if (lockedmove) {
+                                // Outrage counter is reset
+                                if (source.volatiles['lockedmove'].duration === 2) {
+                                        delete source.volatiles['lockedmove'];
+                                }
+                        }
+                        return null;
+                }
+        },
+        secondary: false,
+        target: "allySide",
+        type: "Fighting"
+},
+moonblast": {
+        num: 585,
+        accuracy: 100,
+        basePower: 85,
+        category: "Special",
+        desc: "Has a 30% chance to lower the target's Special Attack by 1 stage.",
+        shortDesc: "30% chance to lower the target's Sp. Atk by 1.",
+        id: "moonblast",
+        isViable: true,
+        name: "Moonblast",
+        pp: 15,
+        priority: 0,
+        flags: {protect: 1, mirror: 1},
+        secondary: {
+                chance: 30,
+                boosts: {
+                        spa: -1
+                }
+        },
+        target: "normal",
+        type: "Fairy"
+},
+"mudbomb": {
+        num: 426,
+        accuracy: 90,
+        basePower: 80,
+        category: "Special",
+        desc: "Has a 30% chance to lower the target's accuracy by 1 stage.",
+        shortDesc: "30% chance to lower the target's accuracy by 1.",
+        id: "mudbomb",
+        name: "Mud Bomb",
+        pp: 10,
+        priority: 0,
+        flags: {bullet: 1, protect: 1, mirror: 1},
+        secondary: {
+                chance: 30,
+                boosts: {
+                        accuracy: -1
+                }
+        },
+        target: "normal",
+        type: "Ground"
+},
+"mysticalfire": {
+        num: 595,
+        accuracy: 100,
+        basePower: 75,
+        category: "Special",
+        desc: "Has a 100% chance to lower the target's Special Attack by 1 stage.",
+        shortDesc: "Lowers the target's Special Attack by 1.",
+        id: "mysticalfire",
+        name: "Mystical Fire",
+        pp: 10,
+        priority: 0,
+        flags: {protect: 1, mirror: 1},
+        secondary: {
+                chance: 100,
+                boosts: {
+                        spa: -1
+                }
+        },
+        target: "normal",
+        type: "Fire"
+},
+"nightslash": {
+        num: 400,
+        accuracy: 100,
+        basePower: 90,
+        category: "Physical",
+        desc: "Has a higher chance for a critical hit.",
+        shortDesc: "High critical hit ratio.",
+        id: "nightslash",
+        isViable: true,
+        name: "Night Slash",
+        pp: 15,
+        priority: 0,
+        flags: {contact: 1, protect: 1, mirror: 1},
+        isContact: true,
+        critRatio: 2,
+        secondary: false,
+        target: "normal",
+        type: "Dark"
+},
+"nobleroar": {
+        num: 568,
+        accuracy: 100,
+        basePower: 0,
+        category: "Status",
+        desc: "Lowers the target's Attack and Special Attack by 1 stage.",
+        shortDesc: "Lowers target's Atk and SpAtk by 1.",
+        id: "nobleroar",
+        name: "Noble Roar",
+        pp: 30,
+        priority: 0,
+        flags: {protect: 1, reflectable: 1, mirror: 1, sound: 1, authentic: 1},
+        isSoundBased: true,
+        boosts: {
+                atk: -1,
+                spa: -1,
+                spe: -1
+        },
+        secondary: false,
+        target: "normal",
+        type: "Normal"
+},
+"ominouswind": {
+        num: 466,
+        accuracy: 100,
+        basePower: 70,
+        category: "Special",
+        desc: "Has a 10% chance to raise the user's Attack, Defense, Special Attack, Special Defense, and Speed by 1 stage.",
+        shortDesc: "10% chance to boost all stats by 1 (not acc/eva).",
+        id: "ominouswind",
+        name: "Ominous Wind",
+        pp: 5,
+        priority: 0,
+        flags: {protect: 1, mirror: 1},
+        secondary: {
+                chance: 10,
+                self: {
+                        boosts: {
+                                atk: 1,
+                                def: 1,
+                                spa: 1,
+                                spd: 1,
+                                spe: 1
+                        }
+                }
+        },
+        target: "normal",
+        type: "Ghost"
 },
 };
