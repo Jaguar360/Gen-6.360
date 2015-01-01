@@ -1176,6 +1176,35 @@ moonblast": {
         target: "any",
         type: "Flying"
 },
+"stealthrock": {
+        num: 446,
+        accuracy: true,
+        basePower: 0,
+        category: "Status",
+        desc: "Sets up a hazard on the foe's side of the field, damaging each foe that switches in. Can be used only once before failing. Foes lose 1/32, 1/16, 1/8, 1/4, or 1/2 of their maximum HP, rounded down, based on their weakness to the Rock type; 0.25x, 0.5x, neutral, 2x, or 4x, respectively. Can be removed from the foe's side if any foe uses Rapid Spin or Defog, or is hit by Defog.",
+        shortDesc: "Hurts foes on switch-in. Factors Rock weakness.",
+        id: "stealthrock",
+        isViable: true,
+        name: "Stealth Rock",
+        pp: 20,
+        priority: 0,
+        flags: {reflectable: 1},
+        isBounceable: true,
+        sideCondition: 'stealthrock',
+        effect: {
+                // this is a side condition
+                onStart: function (side) {
+                        this.add('-sidestart', side, 'move: Stealth Rock');
+                },
+                onSwitchIn: function (pokemon) {
+                        var typeMod = this.clampIntRange(pokemon.runEffectiveness('Rock'), -6, 6);
+                        this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 10);
+                }
+        },
+        secondary: false,
+        target: "foeSide",
+        type: "Rock"
+},
 "surf": {
         num: 57,
         accuracy: 100,
