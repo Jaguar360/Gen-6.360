@@ -165,11 +165,14 @@ exports.BattleAbilities = {
 		num: 112
 	},
 	"snowcloak": {
-		desc: "If active while Hail is in effect, this Pokemon recovers one-sixteenth of its max HP after each turn.",
-		shortDesc: "If Hail is active, this Pokemon heals 1/16 of its max HP each turn.",
-		nWeather: function(target, source, effect) {
-			if (effect.id === 'hail') {
-				this.heal(target.maxhp/16);
+		desc: "If active while Hail is in effect, this Pokemon's Defense increases by 50%.",
+		shortDesc: "If Hail is active, this Pokemon's Defense increases by 50%.",
+		onImmunity: function (type, pokemon) {
+			if (type === 'hail') return false;
+		},
+		onModifySpe: function (defMod, pokemon) {
+			if (this.isWeather(['hail'])) {
+				return this.chain(defMod, 1.5);
 			}
 		},
 		id: "hail",
